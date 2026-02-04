@@ -123,14 +123,14 @@ Create a staging model for the **For-Hire Vehicle (FHV)** trip data for 2019.
 What is the count of records in `stg_fhv_tripdata`?
 
 - [ ] 42,084,899
-- [ ] 43,244,696
+- [x] 43,244,696
 - [ ] 22,998,722
 - [ ] 44,112,187
 
 ```sql
 SELECT 
   COUNT(*)
-FROM ny_taxi.prod.stg_fhv_tripdata;
+FROM taxi_rides_ny.prod.stg_fhv_tripdata;
 ```
 
 ---

@@ -99,8 +99,14 @@ models:
       - name: dispatching_base_num
         description: Dispatching base number
       - name: pickup_datetime
+        description: pick up date and time
       - name: dropOff_datetime
-      - name: PUlocationID
-      - name: DOlocationID
-      - name: SR_Flag
-      - name: Affiliated_base_number
+        description: drop of date and time
+      - name: pickup_location_id
+        description: TLC Taxi Zone where the meter was engaged
+      - name: dropoff_location_id
+        description: TLC Taxi Zone where the meter was disengaged
+      - name: sr_flag
+        description: sr flag
+      - name: affiliated_base_num
+        description: affiliated base number

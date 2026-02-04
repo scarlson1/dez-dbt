@@ -4,12 +4,20 @@ from pathlib import Path
 
 BASE_URL = "https://github.com/DataTalksClub/nyc-tlc-data/releases/download"
 
+is_fhv = True
+
+taxis = ["fhv"] if is_fhv else ["yellow", "green"]
+years = [2019] if is_fhv else [2019, 2020]
+
+print(f"loading {taxis} datasets for years {years}")
+
 
 def download_and_convert_files(taxi_type):
     data_dir = Path("data") / taxi_type
     data_dir.mkdir(exist_ok=True, parents=True)
 
-    for year in [2019]:  # [2019, 2020]:
+    # for year in [2019]:  # [2019, 2020]:
+    for year in years:
         for month in range(1, 13):
             parquet_filename = f"{taxi_type}_tripdata_{year}-{month:02d}.parquet"
             parquet_filepath = data_dir / parquet_filename
@@ -66,13 +74,15 @@ if __name__ == "__main__":
     # Update .gitignore to exclude data directory
     update_gitignore()
 
-    for taxi_type in ["fhv"]:  # ["yellow", "green"]:
+    # for taxi_type in ["fhv"]:  # ["yellow", "green"]:
+    for taxi_type in taxis:
         download_and_convert_files(taxi_type)
 
     con = duckdb.connect("taxi_rides_ny.duckdb")
     con.execute("CREATE SCHEMA IF NOT EXISTS prod")
 
-    for taxi_type in ["fhv"]:  # ["yellow", "green"]:
+    # for taxi_type in ["fhv"]:  # ["yellow", "green"]:
+    for taxi_type in taxis:
         con.execute(
             f"""
             CREATE OR REPLACE TABLE prod.{taxi_type}_tripdata AS
