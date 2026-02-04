@@ -92,3 +92,15 @@ models:
         description: Total amount charged to passengers (does not include cash tips)
       - name: payment_type
         description: Payment method code (1=Credit card, 2=Cash, 3=No charge, 4=Dispute, 5=Unknown, 6=Voided)
+
+  - name: stg_fhv_tripdata
+    description: Staging model for vehicle for hire taxi trip records
+    columns:
+      - name: dispatching_base_num
+        description: Dispatching base number
+      - name: pickup_datetime
+      - name: dropOff_datetime
+      - name: PUlocationID
+      - name: DOlocationID
+      - name: SR_Flag
+      - name: Affiliated_base_number

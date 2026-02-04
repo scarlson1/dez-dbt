@@ -102,3 +102,16 @@ sources:
             description: Improvement surcharge
           - name: total_amount
             description: Total amount charged
+
+      - name: fhv_tripdata
+        description: Raw vehicle for hire taxi trip records
+        loaded_at_field: pickup_datetime
+        columns:
+          - name: dispatching_base_num
+            description: Dispatching base number
+          - name: pickup_datetime
+          - name: dropOff_datetime
+          - name: PUlocationID
+          - name: DOlocationID
+          - name: SR_Flag
+          - name: Affiliated_base_number

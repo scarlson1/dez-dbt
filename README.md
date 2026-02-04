@@ -1,57 +1,140 @@
-Welcome to your new dbt project!
+# Data Engineering Zoomcamp Analytics Engineering with dbt (module 4)
 
-### Using the starter project
-
-Try running the following commands:
-- dbt run
-- dbt test
-
-
-### Resources:
-- Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
-- Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers
-- Join the [chat](https://community.getdbt.com/) on Slack for live discussions and support
-- Find [dbt events](https://events.getdbt.com) near you
-- Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+[link](https://github.com/DataTalksClub/data-engineering-zoomcamp/blob/main/cohorts/2026/04-analytics-engineering/homework.md)
 
 ---
 
-1. Run `ingest.py` to create local data lake for 2019 and 2020 taxi data
-```bash
-python3 ./ingest.py
+### Question 1. dbt Lineage and Execution
+
+Given a dbt project with the following structure:
+
+```
+models/
+├── staging/
+│   ├── stg_green_tripdata.sql
+│   └── stg_yellow_tripdata.sql
+└── intermediate/
+    └── int_trips_unioned.sql (depends on stg_green_tripdata & stg_yellow_tripdata)
 ```
 
-2. Update ~/.dbt/profiles.yml
-```yml
-taxi_rides_ny:
-  target: dev
-  outputs:
-    # DuckDB Development profile
-    dev:
-      type: duckdb
-      path: taxi_rides_ny.duckdb
-      schema: dev
-      threads: 1
-      extensions:
-        - parquet
-      settings:
-        memory_limit: '2GB'
-        preserve_insertion_order: false
+If you run `dbt run --select int_trips_unioned`, what models will be built?
 
-    # DuckDB Production profile
-    prod:
-      type: duckdb
-      path: taxi_rides_ny.duckdb
-      schema: prod
-      threads: 1
-      extensions:
-        - parquet
-      settings:
-        memory_limit: '2GB'
-        preserve_insertion_order: false
+- [x] `stg_green_tripdata`, `stg_yellow_tripdata`, and `int_trips_unioned` (upstream dependencies)
+- [ ] Any model with upstream and downstream dependencies to `int_trips_unioned`
+- [ ] `int_trips_unioned` only
+- [ ] `int_trips_unioned`, `int_trips`, and `fct_trips` (downstream dependencies)
 
-# Troubleshooting:
-# - If you have less than 4GB RAM, try setting memory_limit to '1GB'
-# - If you have 16GB+ RAM, you can increase to '4GB' for faster builds
-# - Expected build time: 5-10 minutes on most systems
+---
+
+### Question 2. dbt Tests
+
+You've configured a generic test like this in your `schema.yml`:
+
+```yaml
+columns:
+  - name: payment_type
+    data_tests:
+      - accepted_values:
+          arguments:
+            values: [1, 2, 3, 4, 5]
 ```
+
+Your model `fct_trips` has been running successfully for months. A new value `6` now appears in the source data.
+
+What happens when you run `dbt test --select fct_trips`?
+
+- [ ] dbt will skip the test because the model didn't change
+- [x] dbt will fail the test, returning a non-zero exit code
+- [ ] dbt will pass the test with a warning about the new value
+- [ ] dbt will update the configuration to include the new value
+
+---
+
+### Question 3. Counting Records in `fct_monthly_zone_revenue`
+
+After running your dbt project, query the `fct_monthly_zone_revenue` model.
+
+What is the count of records in the `fct_monthly_zone_revenue` model?
+
+- [ ] 12,998
+- [ ] 14,120
+- [x] 12,184
+- [ ] 15,421
+
+```sql
+SELECT COUNT(*) FROM ny_taxi.prod.fct_monthly_zone_revenue;
+```
+
+---
+
+### Question 4. Best Performing Zone for Green Taxis (2020)
+
+Using the `fct_monthly_zone_revenue` table, find the pickup zone with the **highest total revenue** (`revenue_monthly_total_amount`) for **Green** taxi trips in 2020.
+
+Which zone had the highest revenue?
+
+- [x] East Harlem North
+- [ ] Morningside Heights
+- [ ] East Harlem South
+- [ ] Washington Heights South
+
+```sql
+SELECT
+  pickup_zone,
+  revenue_monthly_total_amount
+FROM ny_taxi.prod.fct_monthly_zone_revenue
+  WHERE revenue_month BETWEEN '2020-01-01' AND '2020-12-31'
+  AND service_type = 'Green'
+ORDER BY revenue_monthly_total_amount DESC 
+LIMIT 10;
+```
+
+---
+
+### Question 5. Green Taxi Trip Counts (October 2019)
+
+Using the `fct_monthly_zone_revenue` table, what is the **total number of trips** (`total_monthly_trips`) for Green taxis in October 2019?
+
+- [ ] 500,234
+- [ ] 350,891
+- [x] 384,624
+- [ ] 421,509
+
+```sql
+SELECT
+  SUM(total_monthly_trips) AS total_oct_19_green
+FROM ny_taxi.prod.fct_monthly_zone_revenue
+WHERE
+  service_type = 'Green'
+  AND revenue_month = '2019-10-01';
+```
+
+---
+
+### Question 6. Build a Staging Model for FHV Data
+
+Create a staging model for the **For-Hire Vehicle (FHV)** trip data for 2019.
+
+1. Load the [FHV trip data for 2019](https://github.com/DataTalksClub/nyc-tlc-data/releases/tag/fhv) into your data warehouse
+2. Create a staging model `stg_fhv_tripdata` with these requirements:
+   - Filter out records where `dispatching_base_num IS NULL`
+   - Rename fields to match your project's naming conventions (e.g., `PUlocationID` → `pickup_location_id`)
+
+What is the count of records in `stg_fhv_tripdata`?
+
+- [ ] 42,084,899
+- [ ] 43,244,696
+- [ ] 22,998,722
+- [ ] 44,112,187
+
+```sql
+SELECT 
+  COUNT(*)
+FROM ny_taxi.prod.stg_fhv_tripdata;
+```
+
+---
+
+## Submitting the solutions
+
+- Form for submitting: <https://courses.datatalks.club/de-zoomcamp-2026/homework/hw4>

@@ -1,4 +1,7 @@
-with trip_unioned as (
+-- Dimension table for taxi technology vendors
+-- Small static dimension defining vendor codes and their company names
+
+with trips_unioned as (
   select * from {{ ref('int_trips_unioned') }}
 ),
 
